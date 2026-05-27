@@ -10,24 +10,36 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
 .top-bar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
 .top-bar h1 { font-size: 18px; font-weight: 600; }
 .count-tag { background: #ebebeb; border: 1px solid #ddd; color: #555; font-size: 12px; padding: 2px 10px; border-radius: 99px; }
-.add-form { background: #fff; border: 1px solid #e0e0e0; border-radius: 12px; padding: 16px; margin-bottom: 24px; display: grid; grid-template-columns: 1fr 1fr 1fr auto; gap: 10px; align-items: end; }
+.global-add { background: #fff; border: 1px solid #e0e0e0; border-radius: 12px; padding: 14px 16px; margin-bottom: 24px; display: grid; grid-template-columns: 1fr 1fr 1fr auto; gap: 10px; align-items: end; }
 .field label { display: block; font-size: 12px; color: #666; margin-bottom: 4px; }
-.add-form input, .add-form select { width: 100%; border: 1px solid #ddd; border-radius: 8px; padding: 7px 10px; font-size: 14px; background: #fafafa; }
-.add-btn { height: 36px; padding: 0 18px; background: #fff; border: 1px solid #ccc; border-radius: 8px; font-size: 14px; cursor: pointer; white-space: nowrap; }
-.add-btn:hover { background: #f5f5f5; }
+.global-add input, .global-add select { width: 100%; border: 1px solid #ddd; border-radius: 8px; padding: 7px 10px; font-size: 14px; background: #fafafa; }
+.add-btn-global { height: 36px; padding: 0 18px; background: #1a1a1a; color: #fff; border: none; border-radius: 8px; font-size: 14px; cursor: pointer; white-space: nowrap; }
+.add-btn-global:hover { background: #333; }
+.add-btn-global:disabled { opacity: 0.5; cursor: not-allowed; }
 .client-block { background: #fff; border: 1px solid #e0e0e0; border-radius: 14px; padding: 18px 20px; margin-bottom: 16px; }
 .client-title-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
 .client-title { font-size: 20px; font-weight: 600; }
+.client-title-right { display: flex; align-items: center; gap: 10px; }
 .progress-badge { font-size: 13px; color: #666; background: #f0f0f0; border: 1px solid #ddd; border-radius: 99px; padding: 2px 12px; }
+.add-task-btn { background: none; border: 1px solid #ddd; border-radius: 8px; padding: 4px 12px; font-size: 12px; color: #555; cursor: pointer; white-space: nowrap; }
+.add-task-btn:hover { background: #f5f5f5; border-color: #bbb; color: #1a1a1a; }
+.inline-form { display: grid; grid-template-columns: 1fr auto auto; gap: 8px; align-items: center; background: #f9f9f9; border: 1px solid #e0e0e0; border-radius: 10px; padding: 10px 12px; margin-bottom: 8px; }
+.inline-form input, .inline-form select { border: 1px solid #ddd; border-radius: 7px; padding: 6px 10px; font-size: 13px; background: #fff; }
+.inline-form input { flex: 1; }
+.inline-actions { display: flex; gap: 6px; }
+.btn-save { background: #1a1a1a; color: #fff; border: none; border-radius: 7px; padding: 6px 14px; font-size: 13px; cursor: pointer; }
+.btn-save:hover { background: #333; }
+.btn-cancel { background: none; border: 1px solid #ddd; border-radius: 7px; padding: 6px 10px; font-size: 13px; cursor: pointer; color: #888; }
+.btn-cancel:hover { background: #f0f0f0; }
 .task-row { display: flex; align-items: center; gap: 12px; border: 1px solid #e8e8e8; border-radius: 10px; padding: 13px 16px; margin-bottom: 8px; background: #fafafa; }
-.task-check { width: 20px; height: 20px; border: 1.5px solid #ccc; border-radius: 5px; flex-shrink: 0; cursor: pointer; background: #fff; }
-.task-check:hover { border-color: #888; background: #f0f0f0; }
+.task-check { width: 20px; height: 20px; border: 1.5px solid #ccc; border-radius: 5px; flex-shrink: 0; cursor: pointer; background: #fff; transition: all 0.15s; }
+.task-check:hover { border-color: #3B6D11; background: #EAF3DE; }
 .task-text { flex: 1; font-size: 14px; line-height: 1.45; }
 .prio-pill { font-size: 12px; padding: 3px 12px; border-radius: 99px; white-space: nowrap; flex-shrink: 0; }
 .pill-alta { background: #FCEBEB; color: #791F1F; }
 .pill-media { background: #FAEEDA; color: #633806; }
 .pill-baja { background: #EAF3DE; color: #27500A; }
-.del-btn { background: none; border: none; cursor: pointer; color: #bbb; padding: 3px 5px; border-radius: 5px; font-size: 16px; flex-shrink: 0; line-height: 1; }
+.del-btn { background: none; border: none; cursor: pointer; color: #bbb; padding: 3px 5px; border-radius: 5px; font-size: 15px; flex-shrink: 0; }
 .del-btn:hover { color: #c0392b; background: #FCEBEB; }
 .footer-row { display: flex; justify-content: flex-end; margin-top: 8px; }
 .ghost-btn { background: none; border: none; cursor: pointer; font-size: 12px; color: #888; padding: 4px 10px; border-radius: 8px; }
@@ -38,17 +50,20 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
 .done-row .task-text { text-decoration: line-through; color: #999; }
 .done-cliente-tag { font-size: 11px; color: #aaa; white-space: nowrap; }
 .empty-state { text-align: center; padding: 48px 0; color: #aaa; font-size: 14px; }
-@media (max-width: 560px) { .add-form { grid-template-columns: 1fr 1fr; } }
+.status-bar { font-size: 12px; color: #888; margin-bottom: 12px; min-height: 18px; }
+.status-bar.error { color: #c0392b; }
+.status-bar.ok { color: #3B6D11; }
+@media (max-width: 600px) { .global-add { grid-template-columns: 1fr 1fr; } .inline-form { grid-template-columns: 1fr; } }
 </style>
 </head>
 <body>
 
 <div class="top-bar">
   <h1>Tareas por cliente</h1>
-  <span id="total-badge" class="count-tag">0 pendientes</span>
+  <span id="total-badge" class="count-tag">cargando...</span>
 </div>
 
-<div class="add-form">
+<div class="global-add">
   <div class="field">
     <label>Cliente</label>
     <input type="text" id="inp-cliente" placeholder="Nombre del cliente" />
@@ -65,10 +80,11 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
       <option value="baja">Baja</option>
     </select>
   </div>
-  <button class="add-btn" onclick="addTask()">+ Añadir</button>
+  <button class="add-btn-global" id="add-btn" onclick="addTask()">+ Añadir</button>
 </div>
 
-<div id="board"></div>
+<div class="status-bar" id="status-bar"></div>
+<div id="board"><div class="empty-state">Cargando tareas...</div></div>
 
 <div class="footer-row">
   <button class="ghost-btn" id="toggle-done-btn" onclick="toggleDone()" style="display:none">👁 Ver completadas</button>
@@ -76,53 +92,107 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
 <div id="done-section"></div>
 
 <script>
-const MASTER = [
-  { id: 1, cliente: "Caja de Ingenieros", tarea: "Enviar la propuesta de GitHub.", prio: "alta", done: false },
-  { id: 2, cliente: "Caja de Ingenieros", tarea: "Seguimiento de la propuesta de bolsa de horas de Azure.", prio: "alta", done: false },
-  { id: 3, cliente: "Caja de Ingenieros", tarea: "Firma digital, adenda, adopción Microsoft 365.", prio: "alta", done: false },
-  { id: 4, cliente: "Caja de Ingenieros", tarea: "Toni: firma de adenda intranet.", prio: "media", done: false },
-  { id: 5, cliente: "Banco de Sabadell", tarea: "Seguimiento del contrato de extensión de Carles.", prio: "alta", done: false },
-  { id: 6, cliente: "La Salle", tarea: "Hacer seguimiento o reunión Gobierno de Datos.", prio: "baja", done: false },
-  { id: 7, cliente: "Omron", tarea: "Preparar y presentar la propuesta para los RFFs de I+D.", prio: "alta", done: false },
-  { id: 8, cliente: "Omron", tarea: "Quedar para mostrarles los agentes integrados con ATC Visits y con Skills App.", prio: "alta", done: false },
-  { id: 9, cliente: "Omron", tarea: "Ofrecerles una sesión gratuita de Copilot.", prio: "baja", done: false }
+const SUPABASE_URL = 'https://kiqiaxqggxbvxjjtzlbg.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_YeCmBrQz-9SyGx-oASOuNg_DwpKMden';
+const API = SUPABASE_URL + '/rest/v1/tareas';
+const HEADERS = {
+  'apikey': SUPABASE_KEY,
+  'Authorization': 'Bearer ' + SUPABASE_KEY,
+  'Content-Type': 'application/json',
+  'Prefer': 'return=representation'
+};
+
+const INITIAL_TASKS = [
+  { cliente: "Caja de Ingenieros", tarea: "Enviar la propuesta de GitHub.", prio: "alta", done: false },
+  { cliente: "Caja de Ingenieros", tarea: "Seguimiento de la propuesta de bolsa de horas de Azure.", prio: "alta", done: false },
+  { cliente: "Caja de Ingenieros", tarea: "Firma digital, adenda, adopción Microsoft 365.", prio: "alta", done: false },
+  { cliente: "Caja de Ingenieros", tarea: "Toni: firma de adenda intranet.", prio: "media", done: false },
+  { cliente: "Banco de Sabadell",  tarea: "Seguimiento del contrato de extensión de Carles.", prio: "alta", done: false },
+  { cliente: "La Salle",           tarea: "Hacer seguimiento o reunión Gobierno de Datos.", prio: "baja", done: false },
+  { cliente: "Omron",              tarea: "Preparar y presentar la propuesta para los RFFs de I+D.", prio: "alta", done: false },
+  { cliente: "Omron",              tarea: "Quedar para mostrarles los agentes integrados con ATC Visits y con Skills App.", prio: "alta", done: false },
+  { cliente: "Omron",              tarea: "Ofrecerles una sesión gratuita de Copilot.", prio: "baja", done: false },
+  { cliente: "Mediapro",           tarea: "Hacer seguimiento de la propuesta de Briefcase.", prio: "media", done: false },
+  { cliente: "Esade",              tarea: "Seguimiento Briefcase.", prio: "media", done: false }
 ];
 
-const STORAGE_KEY = 'kanban_tareas_v1';
 let tasks = [];
 let showDone = false;
+let openForms = {};
 
-function load() {
+function setStatus(msg, type) {
+  const bar = document.getElementById('status-bar');
+  bar.textContent = msg;
+  bar.className = 'status-bar' + (type ? ' ' + type : '');
+}
+
+async function fetchTasks() {
   try {
-    const saved = localStorage.getItem(STORAGE_KEY);
-    if (saved) { tasks = JSON.parse(saved); }
-    else { tasks = MASTER.map(t => ({...t})); save(); }
-  } catch(e) { tasks = MASTER.map(t => ({...t})); }
-  render();
+    const res = await fetch(API + '?order=id.asc', { headers: HEADERS });
+    if (!res.ok) throw new Error(await res.text());
+    tasks = await res.json();
+    if (tasks.length === 0) {
+      setStatus('Cargando tareas iniciales...', '');
+      const res2 = await fetch(API, { method: 'POST', headers: HEADERS, body: JSON.stringify(INITIAL_TASKS) });
+      if (!res2.ok) throw new Error(await res2.text());
+      tasks = await res2.json();
+    }
+    setStatus(''); render();
+  } catch(e) {
+    setStatus('Error al cargar: ' + e.message, 'error');
+    document.getElementById('board').innerHTML = '<div class="empty-state">❌ No se pudieron cargar las tareas.</div>';
+  }
 }
 
-function save() {
-  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks)); } catch(e) {}
-}
+async function addTask(clientePrefill) {
+  const cliente = clientePrefill || document.getElementById('inp-cliente').value.trim();
+  const tarea = clientePrefill
+    ? document.getElementById('inline-tarea-' + CSS.escape(clientePrefill)).value.trim()
+    : document.getElementById('inp-tarea').value.trim();
+  const prio = clientePrefill
+    ? document.getElementById('inline-prio-' + CSS.escape(clientePrefill)).value
+    : document.getElementById('inp-prio').value;
 
-function addTask() {
-  const cliente = document.getElementById('inp-cliente').value.trim();
-  const tarea = document.getElementById('inp-tarea').value.trim();
-  const prio = document.getElementById('inp-prio').value;
   if (!cliente || !tarea) return;
-  tasks.push({ id: Date.now(), cliente, tarea, prio, done: false });
-  document.getElementById('inp-tarea').value = '';
-  save(); render();
+  if (!clientePrefill) document.getElementById('add-btn').disabled = true;
+  setStatus('Guardando...', '');
+  try {
+    const res = await fetch(API, { method: 'POST', headers: HEADERS, body: JSON.stringify({ cliente, tarea, prio, done: false }) });
+    if (!res.ok) throw new Error(await res.text());
+    const [newTask] = await res.json();
+    tasks.push(newTask);
+    if (!clientePrefill) document.getElementById('inp-tarea').value = '';
+    else delete openForms[clientePrefill];
+    setStatus('Tarea añadida ✓', 'ok');
+    setTimeout(() => setStatus(''), 2000);
+    render();
+  } catch(e) { setStatus('Error: ' + e.message, 'error'); }
+  if (!clientePrefill) document.getElementById('add-btn').disabled = false;
 }
 
-function completeTask(id) {
-  const t = tasks.find(t => t.id === id);
-  if (t) { t.done = true; save(); render(); }
+async function completeTask(id) {
+  try {
+    const res = await fetch(API + '?id=eq.' + id, { method: 'PATCH', headers: HEADERS, body: JSON.stringify({ done: true }) });
+    if (!res.ok) throw new Error(await res.text());
+    const t = tasks.find(t => t.id === id);
+    if (t) t.done = true;
+    render();
+  } catch(e) { setStatus('Error: ' + e.message, 'error'); }
 }
 
-function removeTask(id) {
-  tasks = tasks.filter(t => t.id !== id);
-  save(); render();
+async function removeTask(id) {
+  try {
+    const res = await fetch(API + '?id=eq.' + id, { method: 'DELETE', headers: { ...HEADERS, 'Prefer': 'return=minimal' } });
+    if (!res.ok) throw new Error(await res.text());
+    tasks = tasks.filter(t => t.id !== id);
+    render();
+  } catch(e) { setStatus('Error: ' + e.message, 'error'); }
+}
+
+function toggleInlineForm(cliente) {
+  if (openForms[cliente]) { delete openForms[cliente]; }
+  else { openForms[cliente] = true; }
+  render();
 }
 
 function toggleDone() {
@@ -132,14 +202,12 @@ function toggleDone() {
 }
 
 function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
-
 const PRIO_LABEL = { alta: 'Prioritaria', media: 'Media', baja: 'Baja' };
 
 function render() {
   const pending = tasks.filter(t => !t.done);
   const done = tasks.filter(t => t.done);
   const board = document.getElementById('board');
-  const doneSection = document.getElementById('done-section');
   const btn = document.getElementById('toggle-done-btn');
 
   document.getElementById('total-badge').textContent = pending.length + (pending.length === 1 ? ' pendiente' : ' pendientes');
@@ -154,46 +222,88 @@ function render() {
     Object.values(byClient).forEach(arr => arr.sort((a,b) => prioOrder[a.prio] - prioOrder[b.prio]));
 
     board.innerHTML = Object.entries(byClient).map(([cliente, ctasks]) => {
+      const safeId = cliente.replace(/[^a-zA-Z0-9]/g, '_');
       const rows = ctasks.map(t => `
         <div class="task-row">
           <div class="task-check" title="Marcar como completada" onclick="completeTask(${t.id})"></div>
           <span class="task-text">${esc(t.tarea)}</span>
           <span class="prio-pill pill-${t.prio}">${PRIO_LABEL[t.prio]}</span>
           <button class="del-btn" title="Eliminar" onclick="removeTask(${t.id})">🗑</button>
-        </div>
-      `).join('');
-      return `
-        <div class="client-block">
-          <div class="client-title-row">
-            <span class="client-title">${esc(cliente)}</span>
+        </div>`).join('');
+
+      const inlineForm = openForms[cliente] ? `
+        <div class="inline-form">
+          <input type="text" id="inline-tarea-${safeId}" placeholder="Nueva tarea..." onkeydown="if(event.key==='Enter') addTaskInline('${esc(cliente)}','${safeId}')" />
+          <select id="inline-prio-${safeId}">
+            <option value="alta">Alta</option>
+            <option value="media" selected>Media</option>
+            <option value="baja">Baja</option>
+          </select>
+          <div class="inline-actions">
+            <button class="btn-save" onclick="addTaskInline('${esc(cliente)}','${safeId}')">Guardar</button>
+            <button class="btn-cancel" onclick="toggleInlineForm('${esc(cliente)}')">✕</button>
+          </div>
+        </div>` : '';
+
+      return `<div class="client-block">
+        <div class="client-title-row">
+          <span class="client-title">${esc(cliente)}</span>
+          <div class="client-title-right">
+            <button class="add-task-btn" onclick="toggleInlineForm('${esc(cliente)}')">+ Añadir tarea</button>
             <span class="progress-badge">0/${ctasks.length}</span>
           </div>
-          ${rows}
         </div>
-      `;
+        ${inlineForm}
+        ${rows}
+      </div>`;
     }).join('');
   }
 
+  const doneSection = document.getElementById('done-section');
   if (showDone && done.length > 0) {
     doneSection.innerHTML = `<div class="done-block">
       <div class="done-block-title">✓ Completadas (${done.length})</div>
-      ${done.map(t => `
-        <div class="done-row">
-          <span style="color:#3B6D11;font-size:14px;flex-shrink:0">✓</span>
-          <span class="task-text">${esc(t.tarea)}</span>
-          <span class="done-cliente-tag">${esc(t.cliente)}</span>
-          <button class="del-btn" onclick="removeTask(${t.id})">🗑</button>
-        </div>
-      `).join('')}
+      ${done.map(t => `<div class="done-row">
+        <span style="color:#3B6D11;font-size:14px;flex-shrink:0">✓</span>
+        <span class="task-text">${esc(t.tarea)}</span>
+        <span class="done-cliente-tag">${esc(t.cliente)}</span>
+        <button class="del-btn" onclick="removeTask(${t.id})">🗑</button>
+      </div>`).join('')}
     </div>`;
   } else { doneSection.innerHTML = ''; }
 }
 
+function addTaskInline(cliente, safeId) {
+  const tarea = document.getElementById('inline-tarea-' + safeId).value.trim();
+  const prio = document.getElementById('inline-prio-' + safeId).value;
+  if (!tarea) return;
+  _saveTask(cliente, tarea, prio);
+}
+
+async function _saveTask(cliente, tarea, prio) {
+  setStatus('Guardando...', '');
+  try {
+    const res = await fetch(API, { method: 'POST', headers: HEADERS, body: JSON.stringify({ cliente, tarea, prio, done: false }) });
+    if (!res.ok) throw new Error(await res.text());
+    const [newTask] = await res.json();
+    tasks.push(newTask);
+    delete openForms[cliente];
+    setStatus('Tarea añadida ✓', 'ok');
+    setTimeout(() => setStatus(''), 2000);
+    render();
+  } catch(e) { setStatus('Error: ' + e.message, 'error'); }
+}
+
 document.addEventListener('keydown', e => {
-  if (e.key === 'Enter' && ['inp-tarea','inp-cliente'].includes(document.activeElement.id)) addTask();
+  if (e.key === 'Enter' && ['inp-tarea','inp-cliente'].includes(document.activeElement.id)) {
+    const cliente = document.getElementById('inp-cliente').value.trim();
+    const tarea = document.getElementById('inp-tarea').value.trim();
+    const prio = document.getElementById('inp-prio').value;
+    if (cliente && tarea) _saveTask(cliente, tarea, prio).then(() => { document.getElementById('inp-tarea').value = ''; });
+  }
 });
 
-load();
+fetchTasks();
 </script>
 </body>
 </html>
