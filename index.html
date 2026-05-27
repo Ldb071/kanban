@@ -7,9 +7,18 @@
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f5f5f5; padding: 24px; color: #1a1a1a; }
-.top-bar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+.top-bar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
 .top-bar h1 { font-size: 18px; font-weight: 600; }
 .count-tag { background: #ebebeb; border: 1px solid #ddd; color: #555; font-size: 12px; padding: 2px 10px; border-radius: 99px; }
+.filter-bar { display: flex; align-items: center; gap: 8px; margin-bottom: 20px; flex-wrap: wrap; }
+.filter-bar span { font-size: 12px; color: #888; margin-right: 4px; }
+.filter-btn { border: 1px solid #ddd; background: #fff; border-radius: 99px; padding: 5px 16px; font-size: 13px; cursor: pointer; color: #555; transition: all 0.15s; }
+.filter-btn:hover { border-color: #aaa; color: #1a1a1a; }
+.filter-btn.active { color: #fff; border-color: transparent; }
+.filter-btn.active.all { background: #1a1a1a; }
+.filter-btn.active.alta { background: #A32D2D; }
+.filter-btn.active.media { background: #854F0B; }
+.filter-btn.active.baja { background: #3B6D11; }
 .global-add { background: #fff; border: 1px solid #e0e0e0; border-radius: 12px; padding: 14px 16px; margin-bottom: 24px; display: grid; grid-template-columns: 1fr 1fr 1fr auto; gap: 10px; align-items: end; }
 .field label { display: block; font-size: 12px; color: #666; margin-bottom: 4px; }
 .global-add input, .global-add select { width: 100%; border: 1px solid #ddd; border-radius: 8px; padding: 7px 10px; font-size: 14px; background: #fafafa; }
@@ -25,7 +34,6 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
 .add-task-btn:hover { background: #f5f5f5; border-color: #bbb; color: #1a1a1a; }
 .inline-form { display: grid; grid-template-columns: 1fr auto auto; gap: 8px; align-items: center; background: #f9f9f9; border: 1px solid #e0e0e0; border-radius: 10px; padding: 10px 12px; margin-bottom: 8px; }
 .inline-form input, .inline-form select { border: 1px solid #ddd; border-radius: 7px; padding: 6px 10px; font-size: 13px; background: #fff; }
-.inline-form input { flex: 1; }
 .inline-actions { display: flex; gap: 6px; }
 .btn-save { background: #1a1a1a; color: #fff; border: none; border-radius: 7px; padding: 6px 14px; font-size: 13px; cursor: pointer; }
 .btn-save:hover { background: #333; }
@@ -63,6 +71,14 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
   <span id="total-badge" class="count-tag">cargando...</span>
 </div>
 
+<div class="filter-bar">
+  <span>Filtrar:</span>
+  <button class="filter-btn active all" onclick="setFilter('all')">Todas</button>
+  <button class="filter-btn alta" onclick="setFilter('alta')">🔴 Prioritaria</button>
+  <button class="filter-btn media" onclick="setFilter('media')">🟡 Media</button>
+  <button class="filter-btn baja" onclick="setFilter('baja')">🟢 Baja</button>
+</div>
+
 <div class="global-add">
   <div class="field">
     <label>Cliente</label>
@@ -80,7 +96,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
       <option value="baja">Baja</option>
     </select>
   </div>
-  <button class="add-btn-global" id="add-btn" onclick="addTask()">+ Añadir</button>
+  <button class="add-btn-global" id="add-btn" onclick="addGlobalTask()">+ Añadir</button>
 </div>
 
 <div class="status-bar" id="status-bar"></div>
@@ -119,11 +135,20 @@ const INITIAL_TASKS = [
 let tasks = [];
 let showDone = false;
 let openForms = {};
+let activeFilter = 'all';
 
 function setStatus(msg, type) {
   const bar = document.getElementById('status-bar');
   bar.textContent = msg;
   bar.className = 'status-bar' + (type ? ' ' + type : '');
+}
+
+function setFilter(f) {
+  activeFilter = f;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  const btn = document.querySelector('.filter-btn.' + (f === 'all' ? 'all' : f));
+  if (btn) btn.classList.add('active');
+  render();
 }
 
 async function fetchTasks() {
@@ -144,30 +169,34 @@ async function fetchTasks() {
   }
 }
 
-async function addTask(clientePrefill) {
-  const cliente = clientePrefill || document.getElementById('inp-cliente').value.trim();
-  const tarea = clientePrefill
-    ? document.getElementById('inline-tarea-' + CSS.escape(clientePrefill)).value.trim()
-    : document.getElementById('inp-tarea').value.trim();
-  const prio = clientePrefill
-    ? document.getElementById('inline-prio-' + CSS.escape(clientePrefill)).value
-    : document.getElementById('inp-prio').value;
-
-  if (!cliente || !tarea) return;
-  if (!clientePrefill) document.getElementById('add-btn').disabled = true;
+async function _saveTask(cliente, tarea, prio) {
   setStatus('Guardando...', '');
   try {
     const res = await fetch(API, { method: 'POST', headers: HEADERS, body: JSON.stringify({ cliente, tarea, prio, done: false }) });
     if (!res.ok) throw new Error(await res.text());
     const [newTask] = await res.json();
     tasks.push(newTask);
-    if (!clientePrefill) document.getElementById('inp-tarea').value = '';
-    else delete openForms[clientePrefill];
+    delete openForms[cliente];
     setStatus('Tarea añadida ✓', 'ok');
     setTimeout(() => setStatus(''), 2000);
     render();
   } catch(e) { setStatus('Error: ' + e.message, 'error'); }
-  if (!clientePrefill) document.getElementById('add-btn').disabled = false;
+}
+
+function addGlobalTask() {
+  const cliente = document.getElementById('inp-cliente').value.trim();
+  const tarea = document.getElementById('inp-tarea').value.trim();
+  const prio = document.getElementById('inp-prio').value;
+  if (!cliente || !tarea) return;
+  document.getElementById('inp-tarea').value = '';
+  _saveTask(cliente, tarea, prio);
+}
+
+function addTaskInline(cliente, safeId) {
+  const tarea = document.getElementById('inline-tarea-' + safeId).value.trim();
+  const prio = document.getElementById('inline-prio-' + safeId).value;
+  if (!tarea) return;
+  _saveTask(cliente, tarea, prio);
 }
 
 async function completeTask(id) {
@@ -190,8 +219,8 @@ async function removeTask(id) {
 }
 
 function toggleInlineForm(cliente) {
-  if (openForms[cliente]) { delete openForms[cliente]; }
-  else { openForms[cliente] = true; }
+  if (openForms[cliente]) delete openForms[cliente];
+  else openForms[cliente] = true;
   render();
 }
 
@@ -205,20 +234,21 @@ function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').re
 const PRIO_LABEL = { alta: 'Prioritaria', media: 'Media', baja: 'Baja' };
 
 function render() {
-  const pending = tasks.filter(t => !t.done);
+  const allPending = tasks.filter(t => !t.done);
   const done = tasks.filter(t => t.done);
+  const filtered = activeFilter === 'all' ? allPending : allPending.filter(t => t.prio === activeFilter);
   const board = document.getElementById('board');
   const btn = document.getElementById('toggle-done-btn');
 
-  document.getElementById('total-badge').textContent = pending.length + (pending.length === 1 ? ' pendiente' : ' pendientes');
+  document.getElementById('total-badge').textContent = allPending.length + (allPending.length === 1 ? ' pendiente' : ' pendientes');
   btn.style.display = done.length === 0 ? 'none' : '';
 
-  if (pending.length === 0) {
-    board.innerHTML = '<div class="empty-state">✅ Sin tareas pendientes. ¡Todo al día!</div>';
+  if (filtered.length === 0) {
+    board.innerHTML = '<div class="empty-state">' + (activeFilter === 'all' ? '✅ Sin tareas pendientes. ¡Todo al día!' : 'No hay tareas con esta prioridad.') + '</div>';
   } else {
     const byClient = {};
     const prioOrder = { alta: 0, media: 1, baja: 2 };
-    pending.forEach(t => { if (!byClient[t.cliente]) byClient[t.cliente] = []; byClient[t.cliente].push(t); });
+    filtered.forEach(t => { if (!byClient[t.cliente]) byClient[t.cliente] = []; byClient[t.cliente].push(t); });
     Object.values(byClient).forEach(arr => arr.sort((a,b) => prioOrder[a.prio] - prioOrder[b.prio]));
 
     board.innerHTML = Object.entries(byClient).map(([cliente, ctasks]) => {
@@ -273,34 +303,8 @@ function render() {
   } else { doneSection.innerHTML = ''; }
 }
 
-function addTaskInline(cliente, safeId) {
-  const tarea = document.getElementById('inline-tarea-' + safeId).value.trim();
-  const prio = document.getElementById('inline-prio-' + safeId).value;
-  if (!tarea) return;
-  _saveTask(cliente, tarea, prio);
-}
-
-async function _saveTask(cliente, tarea, prio) {
-  setStatus('Guardando...', '');
-  try {
-    const res = await fetch(API, { method: 'POST', headers: HEADERS, body: JSON.stringify({ cliente, tarea, prio, done: false }) });
-    if (!res.ok) throw new Error(await res.text());
-    const [newTask] = await res.json();
-    tasks.push(newTask);
-    delete openForms[cliente];
-    setStatus('Tarea añadida ✓', 'ok');
-    setTimeout(() => setStatus(''), 2000);
-    render();
-  } catch(e) { setStatus('Error: ' + e.message, 'error'); }
-}
-
 document.addEventListener('keydown', e => {
-  if (e.key === 'Enter' && ['inp-tarea','inp-cliente'].includes(document.activeElement.id)) {
-    const cliente = document.getElementById('inp-cliente').value.trim();
-    const tarea = document.getElementById('inp-tarea').value.trim();
-    const prio = document.getElementById('inp-prio').value;
-    if (cliente && tarea) _saveTask(cliente, tarea, prio).then(() => { document.getElementById('inp-tarea').value = ''; });
-  }
+  if (e.key === 'Enter' && ['inp-tarea','inp-cliente'].includes(document.activeElement.id)) addGlobalTask();
 });
 
 fetchTasks();
