@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tareas por cliente</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f5f5f5; padding: 24px; color: #1a1a1a; }
+.top-bar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+.top-bar h1 { font-size: 18px; font-weight: 600; }
+.count-tag { background: #ebebeb; border: 1px solid #ddd; color: #555; font-size: 12px; padding: 2px 10px; border-radius: 99px; }
+.add-form { background: #fff; border: 1px solid #e0e0e0; border-radius: 12px; padding: 16px; margin-bottom: 24px; display: grid; grid-template-columns: 1fr 1fr 1fr auto; gap: 10px; align-items: end; }
+.field label { display: block; font-size: 12px; color: #666; margin-bottom: 4px; }
+.add-form input, .add-form select { width: 100%; border: 1px solid #ddd; border-radius: 8px; padding: 7px 10px; font-size: 14px; background: #fafafa; }
+.add-btn { height: 36px; padding: 0 18px; background: #fff; border: 1px solid #ccc; border-radius: 8px; font-size: 14px; cursor: pointer; white-space: nowrap; }
+.add-btn:hover { background: #f5f5f5; }
+.client-block { background: #fff; border: 1px solid #e0e0e0; border-radius: 14px; padding: 18px 20px; margin-bottom: 16px; }
+.client-title-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+.client-title { font-size: 20px; font-weight: 600; }
+.progress-badge { font-size: 13px; color: #666; background: #f0f0f0; border: 1px solid #ddd; border-radius: 99px; padding: 2px 12px; }
+.task-row { display: flex; align-items: center; gap: 12px; border: 1px solid #e8e8e8; border-radius: 10px; padding: 13px 16px; margin-bottom: 8px; background: #fafafa; }
+.task-check { width: 20px; height: 20px; border: 1.5px solid #ccc; border-radius: 5px; flex-shrink: 0; cursor: pointer; background: #fff; }
+.task-check:hover { border-color: #888; background: #f0f0f0; }
+.task-text { flex: 1; font-size: 14px; line-height: 1.45; }
+.prio-pill { font-size: 12px; padding: 3px 12px; border-radius: 99px; white-space: nowrap; flex-shrink: 0; }
+.pill-alta { background: #FCEBEB; color: #791F1F; }
+.pill-media { background: #FAEEDA; color: #633806; }
+.pill-baja { background: #EAF3DE; color: #27500A; }
+.del-btn { background: none; border: none; cursor: pointer; color: #bbb; padding: 3px 5px; border-radius: 5px; font-size: 16px; flex-shrink: 0; line-height: 1; }
+.del-btn:hover { color: #c0392b; background: #FCEBEB; }
+.footer-row { display: flex; justify-content: flex-end; margin-top: 8px; }
+.ghost-btn { background: none; border: none; cursor: pointer; font-size: 12px; color: #888; padding: 4px 10px; border-radius: 8px; }
+.ghost-btn:hover { background: #eee; color: #333; }
+.done-block { margin-top: 24px; border-top: 1px solid #e0e0e0; padding-top: 16px; }
+.done-block-title { font-size: 12px; font-weight: 600; color: #888; margin-bottom: 10px; }
+.done-row { display: flex; align-items: center; gap: 12px; background: #f5f5f5; border: 1px solid #e0e0e0; border-radius: 10px; padding: 10px 16px; margin-bottom: 6px; opacity: 0.6; }
+.done-row .task-text { text-decoration: line-through; color: #999; }
+.done-cliente-tag { font-size: 11px; color: #aaa; white-space: nowrap; }
+.empty-state { text-align: center; padding: 48px 0; color: #aaa; font-size: 14px; }
+@media (max-width: 560px) { .add-form { grid-template-columns: 1fr 1fr; } }
+</style>
+</head>
+<body>
+
+<div class="top-bar">
+  <h1>Tareas por cliente</h1>
+  <span id="total-badge" class="count-tag">0 pendientes</span>
+</div>
+
+<div class="add-form">
+  <div class="field">
+    <label>Cliente</label>
+    <input type="text" id="inp-cliente" placeholder="Nombre del cliente" />
+  </div>
+  <div class="field">
+    <label>Tarea</label>
+    <input type="text" id="inp-tarea" placeholder="Descripción" />
+  </div>
+  <div class="field">
+    <label>Prioridad</label>
+    <select id="inp-prio">
+      <option value="alta">Alta</option>
+      <option value="media" selected>Media</option>
+      <option value="baja">Baja</option>
+    </select>
+  </div>
+  <button class="add-btn" onclick="addTask()">+ Añadir</button>
+</div>
+
+<div id="board"></div>
+
+<div class="footer-row">
+  <button class="ghost-btn" id="toggle-done-btn" onclick="toggleDone()" style="display:none">👁 Ver completadas</button>
+</div>
+<div id="done-section"></div>
+
+<script>
+const MASTER = [
+  { id: 1, cliente: "Caja de Ingenieros", tarea: "Enviar la propuesta de GitHub.", prio: "alta", done: false },
+  { id: 2, cliente: "Caja de Ingenieros", tarea: "Seguimiento de la propuesta de bolsa de horas de Azure.", prio: "alta", done: false },
+  { id: 3, cliente: "Caja de Ingenieros", tarea: "Firma digital, adenda, adopción Microsoft 365.", prio: "alta", done: false },
+  { id: 4, cliente: "Caja de Ingenieros", tarea: "Toni: firma de adenda intranet.", prio: "media", done: false },
+  { id: 5, cliente: "Banco de Sabadell", tarea: "Seguimiento del contrato de extensión de Carles.", prio: "alta", done: false },
+  { id: 6, cliente: "La Salle", tarea: "Hacer seguimiento o reunión Gobierno de Datos.", prio: "baja", done: false },
+  { id: 7, cliente: "Omron", tarea: "Preparar y presentar la propuesta para los RFFs de I+D.", prio: "alta", done: false },
+  { id: 8, cliente: "Omron", tarea: "Quedar para mostrarles los agentes integrados con ATC Visits y con Skills App.", prio: "alta", done: false },
+  { id: 9, cliente: "Omron", tarea: "Ofrecerles una sesión gratuita de Copilot.", prio: "baja", done: false }
+];
+
+const STORAGE_KEY = 'kanban_tareas_v1';
+let tasks = [];
+let showDone = false;
+
+function load() {
+  try {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (saved) { tasks = JSON.parse(saved); }
+    else { tasks = MASTER.map(t => ({...t})); save(); }
+  } catch(e) { tasks = MASTER.map(t => ({...t})); }
+  render();
+}
+
+function save() {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks)); } catch(e) {}
+}
+
+function addTask() {
+  const cliente = document.getElementById('inp-cliente').value.trim();
+  const tarea = document.getElementById('inp-tarea').value.trim();
+  const prio = document.getElementById('inp-prio').value;
+  if (!cliente || !tarea) return;
+  tasks.push({ id: Date.now(), cliente, tarea, prio, done: false });
+  document.getElementById('inp-tarea').value = '';
+  save(); render();
+}
+
+function completeTask(id) {
+  const t = tasks.find(t => t.id === id);
+  if (t) { t.done = true; save(); render(); }
+}
+
+function removeTask(id) {
+  tasks = tasks.filter(t => t.id !== id);
+  save(); render();
+}
+
+function toggleDone() {
+  showDone = !showDone;
+  document.getElementById('toggle-done-btn').textContent = showDone ? '🙈 Ocultar completadas' : '👁 Ver completadas';
+  render();
+}
+
+function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+const PRIO_LABEL = { alta: 'Prioritaria', media: 'Media', baja: 'Baja' };
+
+function render() {
+  const pending = tasks.filter(t => !t.done);
+  const done = tasks.filter(t => t.done);
+  const board = document.getElementById('board');
+  const doneSection = document.getElementById('done-section');
+  const btn = document.getElementById('toggle-done-btn');
+
+  document.getElementById('total-badge').textContent = pending.length + (pending.length === 1 ? ' pendiente' : ' pendientes');
+  btn.style.display = done.length === 0 ? 'none' : '';
+
+  if (pending.length === 0) {
+    board.innerHTML = '<div class="empty-state">✅ Sin tareas pendientes. ¡Todo al día!</div>';
+  } else {
+    const byClient = {};
+    const prioOrder = { alta: 0, media: 1, baja: 2 };
+    pending.forEach(t => { if (!byClient[t.cliente]) byClient[t.cliente] = []; byClient[t.cliente].push(t); });
+    Object.values(byClient).forEach(arr => arr.sort((a,b) => prioOrder[a.prio] - prioOrder[b.prio]));
+
+    board.innerHTML = Object.entries(byClient).map(([cliente, ctasks]) => {
+      const rows = ctasks.map(t => `
+        <div class="task-row">
+          <div class="task-check" title="Marcar como completada" onclick="completeTask(${t.id})"></div>
+          <span class="task-text">${esc(t.tarea)}</span>
+          <span class="prio-pill pill-${t.prio}">${PRIO_LABEL[t.prio]}</span>
+          <button class="del-btn" title="Eliminar" onclick="removeTask(${t.id})">🗑</button>
+        </div>
+      `).join('');
+      return `
+        <div class="client-block">
+          <div class="client-title-row">
+            <span class="client-title">${esc(cliente)}</span>
+            <span class="progress-badge">0/${ctasks.length}</span>
+          </div>
+          ${rows}
+        </div>
+      `;
+    }).join('');
+  }
+
+  if (showDone && done.length > 0) {
+    doneSection.innerHTML = `<div class="done-block">
+      <div class="done-block-title">✓ Completadas (${done.length})</div>
+      ${done.map(t => `
+        <div class="done-row">
+          <span style="color:#3B6D11;font-size:14px;flex-shrink:0">✓</span>
+          <span class="task-text">${esc(t.tarea)}</span>
+          <span class="done-cliente-tag">${esc(t.cliente)}</span>
+          <button class="del-btn" onclick="removeTask(${t.id})">🗑</button>
+        </div>
+      `).join('')}
+    </div>`;
+  } else { doneSection.innerHTML = ''; }
+}
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Enter' && ['inp-tarea','inp-cliente'].includes(document.activeElement.id)) addTask();
+});
+
+load();
+</script>
+</body>
+</html>
