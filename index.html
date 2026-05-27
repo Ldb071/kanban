@@ -96,6 +96,13 @@ main { max-width: 960px; margin: 0 auto; padding: 32px 24px; }
 .done-row .task-text { text-decoration: line-through; color: var(--raona-muted); }
 .done-cliente-tag { font-size: 11px; color: var(--raona-subtle); white-space: nowrap; }
 
+
+.prio-select { border: none; border-radius: 99px; padding: 3px 10px; font-size: 11px; font-weight: 500; cursor: pointer; appearance: none; -webkit-appearance: none; background-image: none; }
+.prio-select.alta { background: rgba(192,57,43,0.2); color: #e74c3c; border: 1px solid rgba(192,57,43,0.3); }
+.prio-select.media { background: rgba(230,126,34,0.15); color: #e67e22; border: 1px solid rgba(230,126,34,0.3); }
+.prio-select.baja { background: rgba(122,193,67,0.15); color: var(--raona-green); border: 1px solid rgba(122,193,67,0.3); }
+.prio-select option { background: #fff; color: #1a1a1a; }
+
 /* MISC */
 .empty-state { text-align: center; padding: 56px 0; color: var(--raona-muted); font-size: 14px; }
 .status-bar { font-size: 12px; color: var(--raona-muted); margin-bottom: 12px; min-height: 18px; }
@@ -196,6 +203,21 @@ function setFilter(f) {
   document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
   document.querySelector('.filter-btn.' + (f === 'all' ? 'all' : f)).classList.add('active');
   render();
+}
+
+
+async function changePrio(id, newPrio, selectEl) {
+  try {
+    const res = await fetch(API + '?id=eq.' + id, { method: 'PATCH', headers: HEADERS, body: JSON.stringify({ prio: newPrio }) });
+    if (!res.ok) throw new Error(await res.text());
+    const t = tasks.find(t => t.id === id);
+    if (t) t.prio = newPrio;
+    // Actualizar clases del select sin re-renderizar
+    selectEl.className = 'prio-select ' + newPrio;
+    setStatus('Prioridad actualizada ✓', 'ok');
+    setTimeout(() => setStatus(''), 2000);
+    if (activeFilter !== 'all') render(); // si hay filtro activo re-renderizar
+  } catch(e) { setStatus('Error: ' + e.message, 'error'); }
 }
 
 async function fetchTasks() {
@@ -303,7 +325,11 @@ function render() {
         <div class="task-row">
           <div class="task-check" title="Marcar como completada" onclick="completeTask(${t.id})"></div>
           <span class="task-text">${esc(t.tarea)}</span>
-          <span class="prio-pill pill-${t.prio}">${PRIO_LABEL[t.prio]}</span>
+          <select class="prio-select ${t.prio}" onchange="changePrio(${t.id}, this.value, this)" title="Cambiar prioridad">
+            <option value="alta" ${t.prio==='alta'?'selected':''}>Prioritaria</option>
+            <option value="media" ${t.prio==='media'?'selected':''}>Media</option>
+            <option value="baja" ${t.prio==='baja'?'selected':''}>Baja</option>
+          </select>
           <button class="del-btn" title="Eliminar" onclick="removeTask(${t.id})">✕</button>
         </div>`).join('');
       const inlineForm = openForms[cliente] ? `
